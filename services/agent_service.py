@@ -183,5 +183,14 @@ class AgentService:
             return False
         return True
 
-# Create a singleton instance
-agent_service = AgentService()
+# Create a singleton instance with lazy initialization
+class AgentServiceManager:
+    def __init__(self):
+        self._instance = None
+
+    def get_instance(self):
+        if self._instance is None:
+            self._instance = AgentService()
+        return self._instance
+
+agent_service = AgentServiceManager()

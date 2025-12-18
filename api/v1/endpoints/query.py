@@ -32,7 +32,7 @@ async def query_documentation(request: QueryRequest):
             raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
 
         # Process the query using the RAG service
-        response = rag_service.query_documentation(request)
+        response = rag_service.get_instance().query_documentation(request)
 
         logger.info(f"Query processed successfully, response length: {len(response.answer)}")
         return response

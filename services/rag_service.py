@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 class RAGService:
     def __init__(self):
-        # Initialize the required services
-        self.qdrant_service = qdrant_service
-        self.agent_service = agent_service
+        # Store service managers (they will be initialized when first used)
+        self.qdrant_service_manager = qdrant_service
+        self.agent_service_manager = agent_service
         self.openai_client = None
         self.cohere_client = None
 
@@ -119,7 +119,7 @@ class RAGService:
                 raise Exception("Failed to generate query embedding")
 
             # Search for relevant documents in Qdrant
-            relevant_docs = self.qdrant_service.search_documents(
+            relevant_docs = self.qdrant_service_manager.get_instance().search_documents(
                 query_vector=query_embedding,
                 limit=5  # Get top 5 most relevant documents
             )
@@ -138,7 +138,7 @@ class RAGService:
                 return response
 
             # Generate response using the agent with retrieved context
-            agent_response = self.agent_service.generate_response(
+            agent_response = self.agent_service_manager.get_instance().generate_response(
                 query=query_request.query,
                 context=relevant_docs,
                 selected_text=query_request.selected_text
@@ -219,7 +219,7 @@ class RAGService:
             doc_id = str(uuid.uuid4())
 
             # Add to Qdrant
-            success = self.qdrant_service.add_document(
+            success = self.qdrant_service_manager.get_instance().add_document(
                 document_id=doc_id,
                 content=content,
                 title=title,
@@ -238,5 +238,14 @@ class RAGService:
             logger.error(f"Error adding document to index: {e}")
             return False
 
-# Create a singleton instance
-rag_service = RAGService()
+# Create a singleton instance with lazy initialization
+class RAGServiceManager:
+    def __init__(self):
+        self._instance = None
+
+    def get_instance(self):
+        if self._instance is None:
+            self._instance = RAGService()
+        return self._instance
+
+rag_service = RAGServiceManager()

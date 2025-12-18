@@ -62,5 +62,14 @@ class MonitoringService:
             "metrics": metrics
         }
 
-# Create a singleton instance
-monitoring_service = MonitoringService()
+# Create a singleton instance with lazy initialization
+class MonitoringServiceManager:
+    def __init__(self):
+        self._instance = None
+
+    def get_instance(self):
+        if self._instance is None:
+            self._instance = MonitoringService()
+        return self._instance
+
+monitoring_service = MonitoringServiceManager()

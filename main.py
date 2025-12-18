@@ -44,7 +44,7 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
 
     # Log request metrics
-    monitoring_service.log_request(request, response, process_time)
+    monitoring_service.get_instance().log_request(request, response, process_time)
 
     logger.info(f"Request {request.method} {request.url.path} took {process_time:.3f}s")
     return response
@@ -55,12 +55,12 @@ app.include_router(api_router)
 # Health check endpoint
 @app.get("/health")
 async def health_check():
-    return monitoring_service.health_check()
+    return monitoring_service.get_instance().health_check()
 
 # System metrics endpoint
 @app.get("/metrics")
 async def get_metrics():
-    return monitoring_service.get_system_metrics()
+    return monitoring_service.get_instance().get_system_metrics()
 
 # Basic root endpoint
 @app.get("/")

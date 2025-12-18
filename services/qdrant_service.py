@@ -153,5 +153,14 @@ class QdrantService:
             logger.error(f"Error deleting Qdrant collection: {e}")
             raise
 
-# Create a singleton instance
-qdrant_service = QdrantService()
+# Create a singleton instance with lazy initialization
+class QdrantServiceManager:
+    def __init__(self):
+        self._instance = None
+
+    def get_instance(self):
+        if self._instance is None:
+            self._instance = QdrantService()
+        return self._instance
+
+qdrant_service = QdrantServiceManager()
